@@ -1,0 +1,11 @@
+[
+    {
+        "id": 1,
+        "username": "sohila",
+        "type": "income",
+        "amount": 1000.0,
+        "category": "Food",
+        "date": "2025-10-19",
+        "description": "dairy,meat"
+    }
+]
