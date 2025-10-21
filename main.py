@@ -7,6 +7,19 @@ import report_manager as rm
 from data_manager import save_all
 import ui
 
+
+def show_help():
+    ui.section("Help - Main Menu")
+    print("1. Register  - Create a new user account.")
+    print("2. Login     - Log into an existing account.")
+    print("3. Logout    - Log out the current user.")
+    print("4. Manage Transactions  - Add, view, edit, or delete financial records.")
+    print("5. Reports   - Generate spending or income reports.")
+    print("6. Save & Exit - Save all data and exit safely.")
+    ui.line()
+    input("Press Enter to return to the main menu...")
+
+
 def main_menu():
     while True:
         ui.clear()
@@ -21,10 +34,11 @@ def main_menu():
         ui.menu("Transactions", [("4", "Manage Transactions")])
         ui.menu("Reports", [("5", "Reports")])
         print()
-        print(f"{ui.FG['blue']}6.{ui.RESET} Save & Exit")
+        print(f"{ui.FG['blue']}6.{ui.RESET} Help")
+        print(f"{ui.FG['blue']}7.{ui.RESET} Save & Exit")
         ui.line()
 
-        choice = input("Enter your choice (1-6): ").strip()
+        choice = input("Enter your choice (1-7): ").strip()
 
         if choice == "1":
             um.register_user()
@@ -37,6 +51,8 @@ def main_menu():
         elif choice == "5":
             rm.reports_menu()
         elif choice == "6":
+            show_help()
+        elif choice == "7":
             ui.status_ok("Saving data and exiting... Goodbye.")
             datasets = {
                 "users": um.get_users_data(),
@@ -44,8 +60,10 @@ def main_menu():
             }
             save_all(datasets)
             break
+        
         else:
-            ui.status_warn("Invalid choice. Please enter a number from 1–6.")
+            ui.status_warn("Invalid choice. Please enter a number from 1–7.")
+
 
 if __name__ == "__main__":
     main_menu()

@@ -6,7 +6,7 @@ from decimal import Decimal
 from typing import List
 
 from data_manager import load_json, save_json, FILES
-from utils import today_iso, get_number
+from utils import today_iso, get_number,ask_int_in_range ,get_choice
 import user_manager as um
 import ui
 
@@ -42,10 +42,7 @@ def add_transaction():
 
     user = um.get_current_user()
     ui.section("Add Transaction")
-    t_type = input("Type (income/expense): ").lower().strip()
-    if t_type not in ("income", "expense"):
-        ui.status_err("Invalid type.")
-        return
+    t_type = get_choice("Type (income/expense): ", ["income", "expense"])
 
     amount = get_number("Amount: ")
     category = input("Category (e.g. Food, Salary, Bills): ").title().strip()
@@ -96,11 +93,7 @@ def edit_transaction():
         return
 
     view_transactions()
-    try:
-        txn_id = int(input("Enter the transaction ID to edit: ").strip())
-    except Exception:
-        ui.status_err("Invalid ID.")
-        return
+    txn_id = int(get_number("Enter the transaction ID to edit: "))
 
     user = um.get_current_user()
     for t in _transactions:
@@ -146,11 +139,7 @@ def delete_transaction():
         return
 
     view_transactions()
-    try:
-        txn_id = int(input("Enter the transaction ID to delete: ").strip())
-    except Exception:
-        ui.status_err("Invalid ID.")
-        return
+    txn_id = int(get_number("Enter the transaction ID to edit: "))
 
     user = um.get_current_user()
     for t in list(_transactions):
@@ -177,17 +166,16 @@ def transaction_menu():
         print(f"{ui.FG['blue']}5.{ui.RESET} Back to Main Menu")
         ui.line()
 
-        choice = input("Enter your choice (1-5): ").strip()
-        if choice == "1":
+        choice = ask_int_in_range("Enter your choice (1–5): ", 1, 5)
+
+        if choice == 1:
             add_transaction()
-        elif choice == "2":
+        elif choice == 2:
             view_transactions()
-        elif choice == "3":
+        elif choice == 3:
             edit_transaction()
-        elif choice == "4":
+        elif choice == 4:
             delete_transaction()
-        elif choice == "5":
+        elif choice == 5:
             ui.status_ok("Returning to Main Menu...")
             break
-        else:
-            ui.status_warn("Invalid choice. Please enter a number from 1–5.")
