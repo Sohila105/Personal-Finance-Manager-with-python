@@ -5,10 +5,8 @@ import json
 import os
 from datetime import datetime
 from shutil import copyfile
+import ui
 
-# -------------------------------
-# Default file paths
-# -------------------------------
 DATA_DIR = "data"
 BACKUP_DIR = os.path.join(DATA_DIR, "backups")
 
@@ -26,9 +24,6 @@ def _ensure_dirs():
 
 _ensure_dirs()
 
-# -------------------------------
-# Core JSON helpers
-# -------------------------------
 def load_json(path):
     if not os.path.exists(path):
         return []
@@ -36,15 +31,13 @@ def load_json(path):
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except (json.JSONDecodeError, OSError):
+        ui.status_warn(f"Could not decode {path}; starting empty.")
         return []
 
 def save_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
-# -------------------------------
-# Backups
-# -------------------------------
 def backup_file(path):
     if not os.path.exists(path):
         return
@@ -53,13 +46,10 @@ def backup_file(path):
     dest = os.path.join(BACKUP_DIR, f"{base}_{ts}.bak")
     try:
         copyfile(path, dest)
-        print(f"Backup created: {os.path.basename(dest)}")
+        ui.status_ok(f"Backup created: {os.path.basename(dest)}")
     except Exception as e:
-        print(f"Backup failed for {path}: {e}")
+        ui.status_warn(f"Backup failed for {path}: {e}")
 
-# -------------------------------
-# Unified save/load
-# -------------------------------
 def load_all():
     return {k: load_json(p) for k, p in FILES.items()}
 

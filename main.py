@@ -5,29 +5,24 @@ import user_manager as um
 import transaction_manager as tm
 import report_manager as rm
 from data_manager import save_all
+import ui
 
 def main_menu():
     while True:
-        print("\n========== Personal Finance Manager ==========")
+        ui.clear()
+        ui.banner("Personal Finance Manager", f"{ui.stamp()}")
         cu = um.get_current_user()
         if cu:
-            print(f"Logged in as: {cu['username']} ({cu['currency']})")
+            print(f"{ui.BOLD}{ui.FG['green']}Logged in as:{ui.RESET} {cu['username']} ({cu['currency']})")
         else:
-            print("Not logged in")
+            print(f"{ui.FG['grey']}Not logged in{ui.RESET}")
 
-        print("\n--- User ---")
-        print("1. Register")
-        print("2. Login")
-        print("3. Logout")
-
-        print("\n--- Transactions ---")
-        print("4. Manage Transactions")
-
-        print("\n--- Reports ---")
-        print("5. Reports")
-
-        print("\n6. Save & Exit")
-        print("==============================================")
+        ui.menu("User", [("1", "Register"), ("2", "Login"), ("3", "Logout")])
+        ui.menu("Transactions", [("4", "Manage Transactions")])
+        ui.menu("Reports", [("5", "Reports")])
+        print()
+        print(f"{ui.FG['blue']}6.{ui.RESET} Save & Exit")
+        ui.line()
 
         choice = input("Enter your choice (1-6): ").strip()
 
@@ -42,8 +37,7 @@ def main_menu():
         elif choice == "5":
             rm.reports_menu()
         elif choice == "6":
-            print("Saving data and exiting... Goodbye.")
-            # Centralized save with backups
+            ui.status_ok("Saving data and exiting... Goodbye.")
             datasets = {
                 "users": um.get_users_data(),
                 "transactions": tm.get_transactions_data(),
@@ -51,7 +45,7 @@ def main_menu():
             save_all(datasets)
             break
         else:
-            print("Invalid choice. Please enter a number from 1–6.")
+            ui.status_warn("Invalid choice. Please enter a number from 1–6.")
 
 if __name__ == "__main__":
     main_menu()

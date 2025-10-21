@@ -4,9 +4,6 @@
 from datetime import datetime, date
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
-# -----------------------------
-# Money & Date
-# -----------------------------
 def to_decimal(value):
     try:
         return Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -27,9 +24,6 @@ def parse_date(date_str):
 def today_iso():
     return date.today().isoformat()
 
-# -----------------------------
-# Input helpers
-# -----------------------------
 def get_nonempty_input(prompt):
     while True:
         v = input(prompt).strip()
@@ -56,17 +50,3 @@ def get_number(prompt, allow_zero=False):
             return n
         except ValueError:
             print("Invalid number. Try again.")
-
-# -----------------------------
-# Display helpers
-# -----------------------------
-def print_line(char="-", length=50):
-    print(char * length)
-
-def print_header(title):
-    print_line("=")
-    print(f"{title.upper():^50}")
-    print_line("=")
-
-def pause():
-    input("\nPress Enter to continue...")

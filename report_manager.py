@@ -9,6 +9,7 @@ from typing import List, Dict, Any, Tuple
 from data_manager import load_json, FILES
 from utils import fmt_money, parse_date, to_decimal
 import user_manager as um
+import ui
 
 TXNS_PATH = FILES["transactions"]
 
@@ -68,14 +69,14 @@ def _bar_from_pct(pct: Decimal, width: int = 20) -> str:
 # -----------------------------
 def dashboard_summary():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     cu = um.get_current_user()
     txns = _load_user_transactions()
+    ui.section("Dashboard")
     if not txns:
-        print("\n--- Dashboard ---")
-        print("No transactions yet.")
+        ui.status_warn("No transactions yet.")
         return
 
     total_inc, total_exp, net_all = _totals(txns)
@@ -84,26 +85,24 @@ def dashboard_summary():
     ym_txns = [t for t in txns if _safe_in_month(t.get("date"), today.year, today.month)]
     m_inc, m_exp, m_net = _totals(ym_txns)
 
-    print("\n========== Dashboard ==========")
-    print(f"User: {cu['username']}  |  Currency: {cu['currency']}")
-    print("--------------------------------")
-    print(f"Total Income : {fmt_money(total_inc, cu['currency'])}")
-    print(f"Total Expense: {fmt_money(total_exp, cu['currency'])}")
-    print(f"Net (All)    : {fmt_money(net_all, cu['currency'])}")
-    print("--------------------------------")
+    print(f"{ui.BOLD}User:{ui.RESET} {cu['username']}    {ui.BOLD}Currency:{ui.RESET} {cu['currency']}")
+    ui.line()
+    print(f"{ui.FG['green']}Total Income{ui.RESET} : {fmt_money(total_inc, cu['currency'])}")
+    print(f"{ui.FG['red']}Total Expense{ui.RESET}: {fmt_money(total_exp, cu['currency'])}")
+    print(f"{ui.FG['cyan']}Net (All){ui.RESET}    : {fmt_money(net_all, cu['currency'])}")
+    ui.line()
     print(f"This Month ({today.strftime('%b %Y')})")
     print(f"  Income : {fmt_money(m_inc, cu['currency'])}")
     print(f"  Expense: {fmt_money(m_exp, cu['currency'])}")
     print(f"  Net    : {fmt_money(m_net, cu['currency'])}")
-    print("--------------------------------")
+    ui.line()
     print("Recent Transactions (latest 5):")
     for t in sorted(txns, key=lambda x: x.get("date", ""), reverse=True)[:5]:
         print(f"  {t['date']}  {t['type']:<7}  {t['category']:<14}  {fmt_money(to_decimal(t['amount']), cu['currency'])}  - {t.get('description','')}")
-    print("================================")
 
 def monthly_report():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     cu = um.get_current_user()
@@ -112,31 +111,30 @@ def monthly_report():
         month = int(input("Month (1-12): ").strip())
         _ = date(year, month, 1)
     except Exception:
-        print("Invalid year/month.")
+        ui.status_err("Invalid year/month.")
         return
 
     txns = _load_user_transactions()
     m_txns = [t for t in txns if _safe_in_month(t.get("date"), year, month)]
     inc, exp, net = _totals(m_txns)
 
-    print(f"\n===== Monthly Report: {_month_name(year, month)} =====")
+    ui.section(f"Monthly Report: {_month_name(year, month)}")
     print(f"Income : {fmt_money(inc, cu['currency'])}")
     print(f"Expense: {fmt_money(exp, cu['currency'])}")
     print(f"Net    : {fmt_money(net, cu['currency'])}")
-    print("-------------------------------------------")
+
     if not m_txns:
-        print("No transactions for this month.")
+        ui.status_warn("No transactions for this month.")
         return
 
-    print(f"{'DATE':<12}{'TYPE':<8}{'AMOUNT':<12}{'CATEGORY':<16}{'DESC'}")
-    print("-" * 70)
-    for t in sorted(m_txns, key=lambda x: x.get("date")):
-        print(f"{t['date']:<12}{t['type']:<8}{fmt_money(to_decimal(t['amount']), cu['currency']):<12}{t['category']:<16}{t.get('description','')}")
-    print("===========================================")
+    ui.line()
+    headers = ("DATE","TYPE","AMOUNT","CATEGORY","DESC")
+    rows = [(t['date'], t['type'], fmt_money(to_decimal(t['amount']), cu['currency']), t['category'], t.get('description','')) for t in sorted(m_txns, key=lambda x: x.get("date"))]
+    ui.table(rows, headers=headers, align=["l","l","r","l","l"])
 
 def category_breakdown():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     cu = um.get_current_user()
@@ -152,28 +150,27 @@ def category_breakdown():
             txns = [t for t in txns if _safe_in_month(t.get("date"), year, month)]
             title = f"Category Breakdown – {_month_name(year, month)}"
         except Exception:
-            print("Invalid year/month.")
+            ui.status_err("Invalid year/month.")
             return
 
     cat_totals = _group_by_category(txns)
     total_exp = sum(cat_totals.values(), Decimal("0"))
 
-    print(f"\n===== {title} =====")
+    ui.section(title)
     if total_exp == 0:
-        print("No expense data to show.")
+        ui.status_warn("No expense data to show.")
         return
 
-    rows = sorted(cat_totals.items(), key=lambda kv: kv[1], reverse=True)
-    for cat, amt in rows:
+    rows = []
+    for cat, amt in sorted(cat_totals.items(), key=lambda kv: kv[1], reverse=True):
         pct = (amt / total_exp * 100) if total_exp > 0 else Decimal("0")
         bar = _bar_from_pct(pct)
-        print(f"{cat:<16} {fmt_money(amt, cu['currency']):>12}  {bar} {pct:.1f}%")
-    print(f"{'TOTAL':<16} {fmt_money(total_exp, cu['currency']):>12}")
-    print("===================================")
+        rows.append((cat, fmt_money(amt, cu['currency']), f"{bar} {pct:.1f}%"))
+    ui.table(rows, headers=("CATEGORY","AMOUNT","SHARE"), align=["l","r","l"])
 
 def spending_trend():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     cu = um.get_current_user()
@@ -186,11 +183,11 @@ def spending_trend():
         n = 6
 
     if not buckets:
-        print("No transactions to chart.")
+        ui.status_warn("No transactions to chart.")
         return
 
     ordered = sorted(buckets.keys())[-n:]
-    print("\n===== Spending Trend (Net per Month) =====")
+    ui.section("Spending Trend (Net per Month)")
     max_abs = Decimal("0")
     nets = []
     for y, m in ordered:
@@ -203,27 +200,26 @@ def spending_trend():
 
     width = 24
     for label, net in nets:
-        ratio = (abs(net) / max_abs)                  # Decimal
-        units = int(ratio * Decimal(width) + Decimal("0.5"))
+        ratio = (abs(net) / max_abs)                      # Decimal
+        units = int(ratio * Decimal(width) + Decimal("0.5"))  # keep all Decimal
         if net >= 0:
-            line = " " * width + "|" + "█" * units
+            line = " " * width + "|" + ui.FG["green"] + "█" * units + ui.RESET
         else:
-            line = " " * (width - units) + "█" * units + "|"
+            line = " " * (width - units) + ui.FG["red"] + "█" * units + ui.RESET + "|"
         print(f"{label:<12} {line}  {fmt_money(net, cu['currency'])}")
-
 
 def search_filter():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     cu = um.get_current_user()
     txns = _load_user_transactions()
     if not txns:
-        print("No transactions found.")
+        ui.status_warn("No transactions found.")
         return
 
-    print("\n--- Search & Filter ---")
+    ui.section("Search & Filter")
     start = input("Start date (YYYY-MM-DD, blank for none): ").strip()
     end = input("End date (YYYY-MM-DD, blank for none): ").strip()
     cat = input("Category contains (blank = any): ").strip().lower()
@@ -243,13 +239,13 @@ def search_filter():
                 if d < parse_date(start):
                     continue
             except Exception:
-                print("⚠️ Invalid start date; ignoring.")
+                ui.status_warn("Invalid start date; ignoring.")
         if end:
             try:
                 if d > parse_date(end):
                     continue
             except Exception:
-                print("⚠️ Invalid end date; ignoring.")
+                ui.status_warn("Invalid end date; ignoring.")
 
         if cat and cat not in (t.get("category", "").lower()):
             continue
@@ -260,13 +256,13 @@ def search_filter():
                 if amt < to_decimal(min_amt):
                     continue
             except Exception:
-                print("⚠️ Invalid min amount; ignoring.")
+                ui.status_warn("Invalid min amount; ignoring.")
         if max_amt:
             try:
                 if amt > to_decimal(max_amt):
                     continue
             except Exception:
-                print("⚠️ Invalid max amount; ignoring.")
+                ui.status_warn("Invalid max amount; ignoring.")
 
         filtered.append(t)
 
@@ -280,26 +276,25 @@ def search_filter():
     reverse = (order == "desc")
     filtered.sort(key=key_fn, reverse=reverse)
 
-    print("\n--- Results ---")
     if not filtered:
-        print("No matching transactions.")
+        ui.status_warn("No matching transactions.")
         return
-    print(f"{'DATE':<12}{'TYPE':<8}{'AMOUNT':<12}{'CATEGORY':<16}{'DESC'}")
-    print("-" * 70)
-    for t in filtered:
-        print(f"{t['date']:<12}{t['type']:<8}{fmt_money(to_decimal(t['amount']), cu['currency']):<12}{t['category']:<16}{t.get('description','')}")
-    print("-" * 70)
+
+    ui.line()
+    headers = ("DATE","TYPE","AMOUNT","CATEGORY","DESC")
+    rows = [(t['date'], t['type'], fmt_money(to_decimal(t['amount']), cu['currency']), t['category'], t.get('description','')) for t in filtered]
+    ui.table(rows, headers=headers, align=["l","l","r","l","l"])
 
 def reports_menu():
     while True:
-        print("\n========== Reports ==========")
-        print("1. Dashboard Summary")
-        print("2. Monthly Report")
-        print("3. Category Breakdown")
-        print("4. Spending Trend (ASCII)")
-        print("5. Search & Filter")
-        print("6. Back to Main Menu")
-        print("=============================")
+        ui.section("Reports")
+        print(f"{ui.FG['blue']}1.{ui.RESET} Dashboard Summary")
+        print(f"{ui.FG['blue']}2.{ui.RESET} Monthly Report")
+        print(f"{ui.FG['blue']}3.{ui.RESET} Category Breakdown")
+        print(f"{ui.FG['blue']}4.{ui.RESET} Spending Trend (ASCII)")
+        print(f"{ui.FG['blue']}5.{ui.RESET} Search & Filter")
+        print(f"{ui.FG['blue']}6.{ui.RESET} Back to Main Menu")
+        ui.line()
 
         choice = input("Enter your choice (1-6): ").strip()
         if choice == "1":
@@ -313,6 +308,7 @@ def reports_menu():
         elif choice == "5":
             search_filter()
         elif choice == "6":
+            ui.status_ok("Returning to Main Menu...")
             break
         else:
-            print("Invalid choice. Please enter a number 1–6.")
+            ui.status_warn("Invalid choice. Please enter a number 1–6.")

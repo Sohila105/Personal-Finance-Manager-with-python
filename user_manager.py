@@ -1,3 +1,4 @@
+# user_manager.py
 # User operations backed by data_manager.
 
 from datetime import datetime
@@ -5,6 +6,7 @@ from typing import Optional, List
 
 from data_manager import load_json, save_json, FILES
 from utils import get_nonempty_input
+import ui
 
 USERS_PATH = FILES["users"]
 
@@ -32,10 +34,10 @@ def get_users_data() -> List[dict]:
 # ---------- Core ops ----------
 def register_user():
     global _users
-    print("\n--- Register New User ---")
+    ui.section("Register New User")
     username = get_nonempty_input("Enter a username: ")
     if find_user(username):
-        print("Username already exists. Try another one.")
+        ui.status_err("Username already exists. Try another one.")
         return
 
     password = get_nonempty_input("Enter a password (numbers only for simplicity): ")
@@ -49,28 +51,28 @@ def register_user():
     }
     _users.append(new_user)
     save_json(USERS_PATH, _users)
-    print(f"User '{username}' registered successfully!")
+    ui.status_ok(f"User '{username}' registered successfully!")
 
 def login_user():
     global _current_user
-    print("\n--- Login ---")
+    ui.section("Login")
     username = get_nonempty_input("Enter username: ")
     password = get_nonempty_input("Enter password: ")
 
     user = find_user(username)
     if user and user.get("password") == password:
         _current_user = user
-        print(f"Welcome back, {username}!")
+        ui.status_ok(f"Welcome back, {username}!")
     else:
-        print("Invalid username or password.")
+        ui.status_err("Invalid username or password.")
 
 def logout_user():
     global _current_user
     if _current_user:
-        print(f"Logged out from {_current_user['username']}.")
+        ui.status_ok(f"Logged out from {_current_user['username']}.")
         _current_user = None
     else:
-        print("No user is currently logged in.")
+        ui.status_warn("No user is currently logged in.")
 
 # ---------- Save/Reload ----------
 def reload_users():

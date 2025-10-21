@@ -8,6 +8,7 @@ from typing import List
 from data_manager import load_json, save_json, FILES
 from utils import today_iso, get_number
 import user_manager as um
+import ui
 
 TXNS_PATH = FILES["transactions"]
 
@@ -36,20 +37,20 @@ def get_transactions_data() -> List[dict]:
 # ---------- Core ops ----------
 def add_transaction():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     user = um.get_current_user()
-    print("\n--- Add Transaction ---")
+    ui.section("Add Transaction")
     t_type = input("Type (income/expense): ").lower().strip()
     if t_type not in ("income", "expense"):
-        print("Invalid type.")
+        ui.status_err("Invalid type.")
         return
 
     amount = get_number("Amount: ")
     category = input("Category (e.g. Food, Salary, Bills): ").title().strip()
     if not category:
-        print("Category cannot be empty.")
+        ui.status_err("Category cannot be empty.")
         return
 
     description = input("Description: ").strip()
@@ -68,37 +69,37 @@ def add_transaction():
     }
     _transactions.append(new_txn)
     save_transactions()
-    print("Transaction added successfully!")
+    ui.status_ok("Transaction added successfully!")
 
 def view_transactions():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     user = um.get_current_user()
     records = _user_transactions(user["username"])
-    print(f"\n--- {user['username']}'s Transactions ---")
-
+    ui.section(f"{user['username']}'s Transactions")
     if not records:
-        print("No transactions found.")
+        ui.status_warn("No transactions found.")
         return
 
-    print(f"{'ID':<5}{'TYPE':<10}{'AMOUNT':<10}{'CATEGORY':<15}{'DATE':<12}{'DESC'}")
-    print("-" * 65)
-    for t in records:
-        print(f"{t['id']:<5}{t['type']:<10}{t['amount']:<10}{t['category']:<15}{t['date']:<12}{t.get('description','')}")
-    print("-" * 65)
+    ui.table(
+        rows=[(t['id'], t['type'], f"{t['amount']:.2f}", t['category'], t['date'], t.get('description', '')) for t in records],
+        headers=("ID","TYPE","AMOUNT","CATEGORY","DATE","DESC"),
+        align=["r","l","r","l","l","l"],
+        pad=1
+    )
 
 def edit_transaction():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     view_transactions()
     try:
         txn_id = int(input("Enter the transaction ID to edit: ").strip())
     except Exception:
-        print("Invalid ID.")
+        ui.status_err("Invalid ID.")
         return
 
     user = um.get_current_user()
@@ -111,14 +112,14 @@ def edit_transaction():
                 if new_type in ("income", "expense"):
                     t["type"] = new_type
                 else:
-                    print("Invalid type. Keeping old value.")
+                    ui.status_warn("Invalid type. Keeping old value.")
 
             new_amount = input(f"New amount ({t['amount']}): ").strip()
             if new_amount:
                 try:
                     t["amount"] = float(Decimal(new_amount))
                 except Exception:
-                    print("Invalid amount. Keeping old value.")
+                    ui.status_warn("Invalid amount. Keeping old value.")
 
             new_category = input(f"New category ({t['category']}): ").strip()
             if new_category:
@@ -134,21 +135,21 @@ def edit_transaction():
 
             t["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             save_transactions()
-            print("Transaction updated successfully!")
+            ui.status_ok("Transaction updated successfully!")
             return
 
-    print("Transaction not found.")
+    ui.status_err("Transaction not found.")
 
 def delete_transaction():
     if not um.is_logged_in():
-        print("Please log in first.")
+        ui.status_warn("Please log in first.")
         return
 
     view_transactions()
     try:
         txn_id = int(input("Enter the transaction ID to delete: ").strip())
     except Exception:
-        print("Invalid ID.")
+        ui.status_err("Invalid ID.")
         return
 
     user = um.get_current_user()
@@ -158,23 +159,23 @@ def delete_transaction():
             if confirm == "y":
                 _transactions.remove(t)
                 save_transactions()
-                print("Transaction deleted.")
+                ui.status_ok("Transaction deleted.")
             else:
-                print("Deletion cancelled.")
+                ui.status_warn("Deletion cancelled.")
             return
 
-    print("Transaction not found.")
+    ui.status_err("Transaction not found.")
 
 # ---------- Menu ----------
 def transaction_menu():
     while True:
-        print("\n========== Transaction Menu ==========")
-        print("1. Add Transaction")
-        print("2. View Transactions")
-        print("3. Edit Transaction")
-        print("4. Delete Transaction")
-        print("5. Back to Main Menu")
-        print("======================================")
+        ui.section("Transaction Menu")
+        print(f"{ui.FG['blue']}1.{ui.RESET} Add Transaction")
+        print(f"{ui.FG['blue']}2.{ui.RESET} View Transactions")
+        print(f"{ui.FG['blue']}3.{ui.RESET} Edit Transaction")
+        print(f"{ui.FG['blue']}4.{ui.RESET} Delete Transaction")
+        print(f"{ui.FG['blue']}5.{ui.RESET} Back to Main Menu")
+        ui.line()
 
         choice = input("Enter your choice (1-5): ").strip()
         if choice == "1":
@@ -186,7 +187,7 @@ def transaction_menu():
         elif choice == "4":
             delete_transaction()
         elif choice == "5":
-            print("Returning to Main Menu...")
+            ui.status_ok("Returning to Main Menu...")
             break
         else:
-            print("Invalid choice. Please enter a number from 1–5.")
+            ui.status_warn("Invalid choice. Please enter a number from 1–5.")
