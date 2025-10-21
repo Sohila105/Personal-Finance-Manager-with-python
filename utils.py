@@ -1,0 +1,72 @@
+# utils.py
+# Shared validation, formatting, and menu helpers.
+
+from datetime import datetime, date
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+
+# -----------------------------
+# Money & Date
+# -----------------------------
+def to_decimal(value):
+    try:
+        return Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    except (InvalidOperation, ValueError, TypeError):
+        raise ValueError(f"Invalid numeric value: {value!r}")
+
+def fmt_money(value, currency=None):
+    try:
+        d = to_decimal(value)
+    except Exception:
+        return str(value)
+    s = f"{d:.2f}"
+    return f"{s} {currency}" if currency else s
+
+def parse_date(date_str):
+    return datetime.strptime(date_str, "%Y-%m-%d").date()
+
+def today_iso():
+    return date.today().isoformat()
+
+# -----------------------------
+# Input helpers
+# -----------------------------
+def get_nonempty_input(prompt):
+    while True:
+        v = input(prompt).strip()
+        if v:
+            return v
+        print("Input cannot be empty. Try again.")
+
+def get_choice(prompt, choices):
+    low = [c.lower() for c in choices]
+    while True:
+        v = input(prompt).strip().lower()
+        if v in low:
+            return v
+        print(f"Invalid choice. Options: {', '.join(choices)}")
+
+def get_number(prompt, allow_zero=False):
+    while True:
+        val = input(prompt).strip()
+        try:
+            n = to_decimal(val)
+            if not allow_zero and n <= 0:
+                print("Amount must be > 0.")
+                continue
+            return n
+        except ValueError:
+            print("Invalid number. Try again.")
+
+# -----------------------------
+# Display helpers
+# -----------------------------
+def print_line(char="-", length=50):
+    print(char * length)
+
+def print_header(title):
+    print_line("=")
+    print(f"{title.upper():^50}")
+    print_line("=")
+
+def pause():
+    input("\nPress Enter to continue...")
