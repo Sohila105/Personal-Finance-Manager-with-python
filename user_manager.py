@@ -3,6 +3,9 @@
 
 from datetime import datetime
 from typing import Optional, List
+import hashlib
+import getpass
+
 
 from data_manager import load_json, save_json, FILES
 from utils import get_nonempty_input
@@ -13,6 +16,10 @@ USERS_PATH = FILES["users"]
 # Module-level state
 _users: List[dict] = load_json(USERS_PATH)
 _current_user: Optional[dict] = None
+
+# password hashing
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
 
 # ---------- Queries ----------
 def find_user(username: str):
@@ -40,12 +47,13 @@ def register_user():
         ui.status_err("Username already exists. Try another one.")
         return
 
-    password = get_nonempty_input("Enter a password (numbers only for simplicity): ")
+    password = getpass.getpass("Enter a password (numbers only for simplicity): ")
+    hashed_pw = hash_password(password)
     currency = input("Preferred currency (e.g., USD, EGP, EUR): ").upper().strip() or "USD"
 
     new_user = {
         "username": username,
-        "password": password,
+        "password": hashed_pw,
         "currency": currency,
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
@@ -57,10 +65,10 @@ def login_user():
     global _current_user
     ui.section("Login")
     username = get_nonempty_input("Enter username: ")
-    password = get_nonempty_input("Enter password: ")
+    password = getpass.getpass("Enter password: ")
 
     user = find_user(username)
-    if user and user.get("password") == password:
+    if user and user.get("password") == hash_password(password):
         _current_user = user
         ui.status_ok(f"Welcome back, {username}!")
     else:
