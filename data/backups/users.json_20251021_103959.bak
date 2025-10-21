@@ -1,0 +1,12 @@
+[
+    {
+        "username": "sohila",
+        "password": "1234",
+        "currency": "USD"
+    },
+    {
+        "username": "anan",
+        "password": "123456",
+        "currency": "EGP"
+    }
+]

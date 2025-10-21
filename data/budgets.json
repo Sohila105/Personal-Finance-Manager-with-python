@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "username": "sarah",
+        "category": "Food",
+        "limit": 1500,
+        "month": "2025-10"
+    },
+    {
+        "username": "ali",
+        "category": "Utilities",
+        "limit": 300,
+        "month": "2025-10"
+    }
+]

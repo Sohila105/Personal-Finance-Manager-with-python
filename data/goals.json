@@ -1,1 +1,16 @@
-[]
+[
+    {
+        "username": "sarah",
+        "goal_name": "New Laptop",
+        "target_amount": 20000,
+        "saved_so_far": 5000,
+        "deadline": "2026-03-01"
+    },
+    {
+        "username": "ali",
+        "goal_name": "Vacation Fund",
+        "target_amount": 3000,
+        "saved_so_far": 800,
+        "deadline": "2026-01-15"
+    }
+]

@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "username": "sohila",
+        "type": "income",
+        "amount": 2000.0,
+        "category": "Bills",
+        "date": "2025-10-19",
+        "description": "water bill"
+    },
+    {
+        "id": 2,
+        "username": "sohila",
+        "type": "expense",
+        "amount": 2000.0,
+        "category": "Bills",
+        "date": "2025-10-19",
+        "description": "electric bill"
+    }
+]
