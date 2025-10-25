@@ -54,7 +54,8 @@ def health_score():
     var = sum((v-mean)**2 for v in vals) / max(1,len(vals))
     # normalize score: higher savings rate and lower volatility -> higher score
     rate_score = min(100, max(0, float(savings_rate)))          # 0..100
-    vol_penalty = min(40, 40 * float((var**0.5) / (mean+Decimal("1"))))  # cap
+    vol_penalty = min(40, 40 * float(var.sqrt() / (mean + Decimal("1"))))  # cap
+
     score = max(0, min(100, rate_score - vol_penalty))
 
     ui.section("Financial Health Score")
