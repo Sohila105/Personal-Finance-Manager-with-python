@@ -1,0 +1,9 @@
+id,username,type,amount,category,date,description,created_at,updated_at
+1,sarah,income,12000.0,Salary,2025-10-01,October Salary,2025-10-01 09:00:00,2025-10-01 09:00:00
+2,sarah,expense,450.5,Food,2025-10-03,Groceries,2025-10-03 10:00:00,2025-10-03 10:00:00
+3,sarah,expense,2500.0,Rent,2025-10-05,October Rent,2025-10-05 09:00:00,2025-10-05 09:00:00
+4,sarah,expense,300.0,Transport,2025-09-25,Taxi and Metro,2025-09-25 08:30:00,2025-09-25 08:30:00
+1,ali,income,2000.0,Freelance,2025-10-02,Website project,2025-10-02 14:00:00,2025-10-02 14:00:00
+2,ali,expense,150.0,Utilities,2025-10-04,Electricity bill,2025-10-04 10:00:00,2025-10-04 10:00:00
+3,ali,expense,400.0,Food,2025-09-30,Dinner and snacks,2025-09-30 19:00:00,2025-09-30 19:00:00
+5,sarah,income,100.0,Food,2025-10-21,,2025-10-21 11:08:35,2025-10-21 11:08:35

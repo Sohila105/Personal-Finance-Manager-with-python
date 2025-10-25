@@ -1,6 +1,3 @@
-# data_manager.py
-# Centralized file I/O and backups for JSON datasets.
-
 import json
 import os
 from datetime import datetime
@@ -16,7 +13,14 @@ FILES = {
     "goals": os.path.join(DATA_DIR, "goals.json"),
     "budgets": os.path.join(DATA_DIR, "budgets.json"),
     "reminders": os.path.join(DATA_DIR, "reminders.json"),
+    "recurring": os.path.join(DATA_DIR, "recurring.json"), 
 }
+
+def save_json_with_backup(path, data):
+    """Always create a timestamped backup before write."""
+    backup_file(path)
+    save_json(path, data)
+    ui.status_ok(f"Saved {os.path.basename(path)} with backup.")
 
 def _ensure_dirs():
     os.makedirs(DATA_DIR, exist_ok=True)
