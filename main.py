@@ -37,10 +37,11 @@ def main_menu():
         ui.menu("Health", [("11","Financial Health Score")])
         ui.menu("Analytics", [("12","Predictive Analytics")])
         print()
-        print(f"{ui.FG['blue']}13.{ui.RESET} Save & Exit")
+        ui.menu("Help", [("13","Help")])
+        print(f"{ui.FG['blue']}14.{ui.RESET} Save & Exit")
         ui.line()
 
-        choice = input("Enter your choice (1-13): ").strip()
+        choice = input("Enter your choice (1-14): ").strip()
 
         if choice == "1": um.register_user()
         elif choice == "2": um.login_user()
@@ -54,7 +55,8 @@ def main_menu():
         elif choice == "10": ie.import_export_menu()
         elif choice == "11": hm.health_menu()
         elif choice == "12": an.analytics_menu()
-        elif choice == "13":
+        elif choice == "13":show_help()
+        elif choice == "14":
             ui.status_ok("Saving data and exiting... Goodbye.")
             datasets = {
                 "users": um.get_users_data(),
@@ -76,10 +78,17 @@ def show_help():
     print("3. Logout    - Log out the current user.")
     print("4. Manage Transactions  - Add, view, edit, or delete financial records.")
     print("5. Reports   - Generate spending or income reports.")
-    print("6. Save & Exit - Save all data and exit safely.")
+    print("6. Savings Goals - Create and track goals for saving money.")
+    print("7. Monthly Budgets - Set limits on spending and track progress.")
+    print("8. Recurring Transactions - Set automated monthly transactions.")
+    print("9. Bill Reminders - Get notified about upcoming bills.")
+    print("10. CSV Import/Export - Load and export data using CSV files.")
+    print("11. Financial Health Score - View your personal financial rating.")
+    print("12. Predictive Analytics - Forecast income, expenses, and spending trends.")
+    print("13. Help - Display this help menu anytime.")
+    print("14. Save & Exit - Save all data and exit safely.")
     ui.line()
     input("Press Enter to return to the main menu...")
-
 
 if __name__ == "__main__":
     main_menu()
