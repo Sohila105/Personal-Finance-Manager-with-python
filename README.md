@@ -50,7 +50,7 @@ It supports **user accounts**, **transactions**, **budgets**, **savings goals**,
 ![Main Menu](assets/menu.png)
 
 ### Transactions Screen
-![Transactions Screen](assets/transactions.png)
+![Transactions Screen](assets/Transactions.png)
 
 ### Reports Screen
 ![Reports Screen](assets/Reports.png)

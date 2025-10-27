@@ -7,6 +7,7 @@ import ui
 DATA_DIR = "data"
 BACKUP_DIR = os.path.join(DATA_DIR, "backups")
 
+#Backups and saving files
 FILES = {
     "users": os.path.join(DATA_DIR, "users.json"),
     "transactions": os.path.join(DATA_DIR, "transactions.json"),
