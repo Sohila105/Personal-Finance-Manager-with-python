@@ -5,8 +5,6 @@ from datetime import datetime
 from typing import Optional, List
 import hashlib
 import getpass
-
-
 from data_manager import load_json, save_json, FILES
 from utils import get_nonempty_input
 import ui

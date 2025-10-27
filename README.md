@@ -44,6 +44,20 @@ It supports **user accounts**, **transactions**, **budgets**, **savings goals**,
 
 ---
 
+
+## Preview
+
+### Main Menu
+![Main Menu](assets/menu.png)
+
+### Transactions Screen
+![Transactions Screen](assets/transactions.png)
+
+### Reports Screen
+![Reports Screen](assets/Reports.png)
+
+---
+
 ##  Setup
 
 1. Clone this repository:  
