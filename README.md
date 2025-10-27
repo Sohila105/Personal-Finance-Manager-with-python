@@ -44,7 +44,6 @@ It supports **user accounts**, **transactions**, **budgets**, **savings goals**,
 
 ---
 
-
 ## Preview
 
 ### Main Menu
